@@ -6,14 +6,45 @@ import RainChart from '@/components/RainChart'
 import StatCard from '@/components/StatCard'
 import TempChart from '@/components/TempChart'
 import fetchWeatherQuery from '@/graphql/queries/fetchWeatherQueries'
+import cleanData from '@/lib/cleanData'
+import getBasePath from '@/lib/getBasePath'
 
-export const revalidate = 60
+export const revalidate = 1440
 
 type Props = {
   params: {
     city: string
     lat: string
     long: string
+  }
+}
+
+async function getData(results: Root, city: string) {
+  try {
+    const dataToSend = cleanData(results, city)
+
+    const res = await fetch(`${getBasePath()}/api/getWeatherSummary`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        weatherData: dataToSend,
+      }),
+    })
+
+    const GPTdata = await res.json()
+    const { content } = GPTdata
+
+    return {
+      fetchingError: false,
+      content,
+    }
+  } catch (error) {
+    return {
+      fetchingError: true,
+      error: error,
+    }
   }
 }
 
@@ -34,7 +65,7 @@ export default async function WeatherPage({
 
   const results: Root = data.myQuery
 
-  console.log(results)
+  const { content, fetchingError } = await getData(results, city)
 
   return (
     <div className="flex flex-col min-h-screen md:flex-row">
@@ -56,7 +87,13 @@ export default async function WeatherPage({
           </div>
 
           <div className="m-2 mb-10">
-            <CalloutCard message="This is where GPT-4 Summary goes" />
+            <CalloutCard
+              message={
+                fetchingError
+                  ? "There should be an openAI generated weather forecast, but looks like token is not working, so it's impossible to generate response."
+                  : content
+              }
+            />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 m-2">
@@ -89,7 +126,7 @@ export default async function WeatherPage({
             <div className="flex space-x-3">
               <StatCard
                 title="Wind Speed"
-                metric={`${results.current_weather.windspeed.toFixed(1)} m/s`}
+                metric={`${results.current_weather.windspeed.toFixed(1)} km/h`}
                 color="cyan"
               />
               <StatCard
