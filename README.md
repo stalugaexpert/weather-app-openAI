@@ -1,4 +1,4 @@
-This is a simple weather app written using Next.js 13.3 (with app directory), openAI - for generating weather forecast summary, Tailwind CSS - for styling, openWeatherAPI as a data provider for the weather, StepZen - to build graphQL and generate types automatically. Application uses ISR and data caching using Next.js SSR features for the better performance.
+This is a weather app written using Next.js 13.3 (with app directory), openAI - for generating weather forecast summary, Tailwind CSS - for styling, openWeatherAPI as a data provider for the weather, StepZen - to build graphQL and generate types automatically. Application uses ISR and data caching using Next.js SSR features for the better performance.
 
 Check the deployment under this link:
 
